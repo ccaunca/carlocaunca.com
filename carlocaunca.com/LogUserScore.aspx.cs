@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using carlocaunca.com.Models;
+using FallDownDatabase;
 
 namespace carlocaunca.com
 {
@@ -14,24 +14,34 @@ namespace carlocaunca.com
         {
             if (Page.Request.HttpMethod == "POST")
             {
-                string initials = (Request.Form["Initials"]);
+                string name = (Request.Form["Name"]);
                 string score = (Request.Form["Score"]);
-                
-                using (var db = new FallDownContext())
+                try
                 {
-                    HighScore highScore = new HighScore
+                    using (var db = new FallDownContext())
                     {
-                        Name = "ZZZ",
-                        Score = Convert.ToInt32("23"),
-                        InsertDatetime = DateTime.Now
-                    };
-                    db.HighScores.Add(highScore);
-                    db.SaveChanges();
+                        HighScore highScore = new HighScore
+                        {
+                            Name = name,
+                            Score = Convert.ToInt32(score),
+                            InsertDatetime = DateTime.Now
+                        };
+                        db.AddToHighScores(highScore);
+                        db.SaveChanges();
+                    }
+                    Response.Clear();
+                    Response.ContentType = "application/text; charset=utf-8";
+                    Response.Write("True");
+                    Response.End();
                 }
-                Response.Clear();
-                Response.ContentType = "application/text; charset=utf-8";
-                Response.Write("Total Score: 200");
-                Response.End();
+                catch(Exception ex)
+                {
+                    Response.Clear();
+                    Response.ContentType = "application/text; charset=utf-8";
+                    Response.Write("False");
+                    Response.End();
+                    throw ex;
+                }
             }
         }
     }
